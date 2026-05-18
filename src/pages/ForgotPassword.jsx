@@ -1,0 +1,187 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
+import './Auth.css';
+
+const ForgotPassword = () => {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const [step, setStep] = useState(1);
+  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const [otp, setOtp] = useState(Array(6).fill(''));
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleNextStep1 = (e) => {
+    e.preventDefault();
+    if (emailOrPhone.trim()) {
+      setStep(2);
+    }
+  };
+
+  const handleNextStep2 = (e) => {
+    e.preventDefault();
+    if (otp.join('').length === 6) {
+      setStep(3);
+    } else {
+      showToast("Vui lòng nhập đủ 6 số OTP!", true);
+    }
+  };
+
+  const handleOtpChange = (element, index) => {
+    if (isNaN(element.value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = element.value;
+    setOtp(newOtp);
+
+    // Focus next input
+    if (element.nextSibling && element.value !== '') {
+      element.nextSibling.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !otp[index] && e.target.previousSibling) {
+      e.target.previousSibling.focus();
+    }
+  };
+
+  const handleResetPassword = (e) => {
+    e.preventDefault();
+    if (newPassword && newPassword === confirmPassword) {
+      showToast("Cập nhật mật khẩu thành công!");
+      navigate('/login');
+    } else {
+      showToast("Mật khẩu không khớp!", true);
+    }
+  };
+
+  return (
+    <div className="auth-page-container dark-theme" style={{ colorScheme: 'dark' }}>
+      <Link to="/login" className="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg> Quay lại
+      </Link>
+
+      <div className="logo-section">
+        <div className="logo-wrapper">
+          <Link to="/" className="logo">
+            <img src="/images/only_logo.png" alt="Nighthub Logo" />
+          </Link>
+        </div>
+      </div>
+
+      <div className="auth-card">
+        {step === 1 && (
+          <>
+            <h2 className="card-title">Quên Mật Khẩu</h2>
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '20px', fontSize: '14px' }}>
+              Vui lòng nhập Email hoặc Số điện thoại để nhận mã xác thực
+            </p>
+            <form className="auth-form" onSubmit={handleNextStep1}>
+              <div className="input-group">
+                <span className="input-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                </span>
+                <input 
+                  type="text" 
+                  placeholder="Email hoặc số điện thoại" 
+                  value={emailOrPhone}
+                  onChange={(e) => setEmailOrPhone(e.target.value)}
+                  required 
+                />
+              </div>
+              
+              <button type="submit" className="auth-btn-submit" style={{ marginTop: '10px' }}>Tiếp Tục</button>
+            </form>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <h2 className="card-title">Xác Thực OTP</h2>
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '20px', fontSize: '14px' }}>
+              Mã xác nhận gồm 6 số đã được gửi đến <br /> <strong>{emailOrPhone}</strong>
+            </p>
+            <form className="auth-form" onSubmit={handleNextStep2}>
+              <div className="otp-container" style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
+                {otp.map((data, index) => (
+                  <input
+                    className="otp-input"
+                    type="text"
+                    name="otp"
+                    maxLength="1"
+                    key={index}
+                    value={data}
+                    onChange={e => handleOtpChange(e.target, index)}
+                    onKeyDown={e => handleOtpKeyDown(e, index)}
+                    onFocus={e => e.target.select()}
+                    style={{
+                      width: '45px',
+                      height: '55px',
+                      fontSize: '24px',
+                      textAlign: 'center',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      color: 'var(--text-main)',
+                      outline: 'none'
+                    }}
+                  />
+                ))}
+              </div>
+              
+              <button type="submit" className="auth-btn-submit" style={{ marginTop: '10px' }}>Xác Thực</button>
+              
+              <div className="auth-nav-text" style={{ marginTop: '15px' }}>
+                Chưa nhận được mã? <a href="#" onClick={(e) => { e.preventDefault(); showToast('Đã gửi lại mã!'); }}>Gửi lại</a>
+              </div>
+            </form>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <h2 className="card-title">Mật Khẩu Mới</h2>
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginBottom: '20px', fontSize: '14px' }}>
+              Vui lòng tạo mật khẩu mới cho tài khoản của bạn
+            </p>
+            <form className="auth-form" onSubmit={handleResetPassword}>
+              <div className="input-group">
+                <span className="input-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </span>
+                <input 
+                  type="password" 
+                  placeholder="Mật khẩu mới" 
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required 
+                />
+              </div>
+              
+              <div className="input-group">
+                <span className="input-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </span>
+                <input 
+                  type="password" 
+                  placeholder="Xác nhận mật khẩu" 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required 
+                />
+              </div>
+              
+              <button type="submit" className="auth-btn-submit" style={{ marginTop: '10px' }}>Cập Nhật Mật Khẩu</button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ForgotPassword;
