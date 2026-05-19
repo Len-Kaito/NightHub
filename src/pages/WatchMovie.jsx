@@ -6,13 +6,14 @@ import FilterModal from '../components/FilterModal';
 import { useContent } from '../context/ContentContext';
 import { useUser } from '../context/UserContext';
 import MovieCardVertical from '../components/MovieCardVertical';
+import CommentSection from '../components/CommentSection';
 
 const POSTER = '/images/poster_1.jpeg';
 const DEFAULT_AVATAR = 'https://static2.vieon.vn/vieplay-image/profile_avatar/2023/03/28/9rdo8k24_asset24x.webp';
 
 const WatchMovie = () => {
   const { id } = useParams();
-  const { movies, getMovieById, getCommentsForMovie, addComment, getMoviesByTag } = useContent();
+  const { movies, getMovieById, getMoviesByTag } = useContent();
   const { profiles, activeProfileId, isLoggedIn, showSkipIntro, autoPlayNext } = useUser();
   const currentUser = profiles?.find(p => p.id === activeProfileId) || profiles?.[0] || null;
 
@@ -175,60 +176,7 @@ const WatchMovie = () => {
     setRatedLocked(true);
   };
 
-  const handleSubmitComment = () => {
-    if (!commentText.trim()) return;
-    addComment(movie.id, {
-      id: Date.now(),
-      author: currentUser?.name || 'Ẩn danh',
-      user: currentUser?.name || 'Ẩn danh',
-      avatar: currentUser?.avatarUrl || DEFAULT_AVATAR,
-      avatarUrl: currentUser?.avatarUrl || DEFAULT_AVATAR,
-      time: 'Vừa xong',
-      text: commentText.trim(),
-      likes: 0,
-      replies: [],
-    });
-    setCommentText('');
-  };
 
-  const [likedComments, setLikedComments] = useState(new Set());
-  const [replyingTo, setReplyingTo] = useState(null);
-  const [replyTexts, setReplyTexts] = useState({});
-  const [commentLikes, setCommentLikes] = useState({});
-  const [commentReplies, setCommentReplies] = useState({});
-
-  const handleLike = (idx) => {
-    setLikedComments(prev => {
-      const next = new Set(prev);
-      if (next.has(idx)) { next.delete(idx); }
-      else { next.add(idx); }
-      return next;
-    });
-    setCommentLikes(prev => ({
-      ...prev,
-      [idx]: (prev[idx] ?? 0) + (likedComments.has(idx) ? -1 : 1)
-    }));
-  };
-
-  const handleReplySubmit = (idx) => {
-    const text = (replyTexts[idx] || '').trim();
-    if (!text) return;
-    const newReply = {
-      author: currentUser?.name || 'Ẩn danh',
-      avatar: currentUser?.avatarUrl || DEFAULT_AVATAR,
-      text,
-      time: 'Vừa xong',
-      likes: 0,
-    };
-    setCommentReplies(prev => ({
-      ...prev,
-      [idx]: [...(prev[idx] || []), newReply],
-    }));
-    setReplyTexts(prev => ({ ...prev, [idx]: '' }));
-    setReplyingTo(null);
-  };
-
-  const commentsList = getCommentsForMovie(movie.id);
 
   const episodes = [
     { id: 1, title: 'Tập 1', duration: '9m 56s' },
@@ -524,105 +472,7 @@ const WatchMovie = () => {
               </div>
 
               {/* BÌNH LUẬN */}
-              <div className="comment-box">
-                <h3>Bình luận ({commentsList.length})</h3>
-                <div className="comment-input-area">
-                  <img
-                    src={currentUser?.avatarUrl || DEFAULT_AVATAR}
-                    alt="Avatar"
-                    className="comment-avatar"
-                  />
-                  <div className="input-wrapper">
-                    <textarea
-                      className="comment-input"
-                      placeholder="Bạn nghĩ gì về tập phim này?"
-                      value={commentText}
-                      rows={2}
-                      onChange={e => setCommentText(e.target.value)}
-                    ></textarea>
-                    <button
-                      className="btn-submit"
-                      onClick={handleSubmitComment}
-                      disabled={!commentText.trim()}
-                    >Đăng bình luận</button>
-                  </div>
-                </div>
-
-                <div className="comment-list">
-                  {commentsList.slice(0, 8).map((c, i) => (
-                    <div key={i} className="comment-item">
-                      <img src={c.avatar || c.avatarUrl || DEFAULT_AVATAR} alt="Avatar" className="comment-avatar" />
-                      <div className="comment-content">
-                        <div className="comment-header">
-                          <span className="comment-author">{c.author || c.user || c.name || 'Ẩn danh'}</span>
-                          <span className="comment-time">{c.time}</span>
-                        </div>
-                        <div className="comment-text">{c.text}</div>
-                        <div className="comment-actions">
-                          <button
-                            className={likedComments.has(i) ? 'liked' : ''}
-                            onClick={() => handleLike(i)}
-                          >
-                            <svg viewBox="0 0 24 24" width="14" height="14"
-                              fill={likedComments.has(i) ? 'currentColor' : 'none'}
-                              stroke="currentColor" strokeWidth="2">
-                              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                            </svg>
-                            {(c.likes || 0) + (commentLikes[i] ?? 0)}
-                          </button>
-                          <button onClick={() => setReplyingTo(replyingTo === i ? null : i)}>
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                            </svg>
-                            Phản hồi
-                          </button>
-                        </div>
-
-                        {replyingTo === i && (
-                          <div className="reply-input-area">
-                            <img src={currentUser?.avatarUrl || DEFAULT_AVATAR} alt="avatar" className="reply-avatar" />
-                            <div className="reply-wrapper">
-                              <textarea
-                                className="reply-input"
-                                placeholder={`Phản hồi ${c.author || c.user || 'bình luận này'}...`}
-                                value={replyTexts[i] || ''}
-                                onChange={e => setReplyTexts(prev => ({...prev, [i]: e.target.value}))}
-                                rows={2}
-                              />
-                              <div className="reply-actions">
-                                <button className="btn-cancel" onClick={() => setReplyingTo(null)}>Hủy</button>
-                                <button
-                                  className="btn-submit-reply"
-                                  disabled={!(replyTexts[i] || '').trim()}
-                                  onClick={() => handleReplySubmit(i)}
-                                >Gửi</button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* REPLIES LIST */}
-                        {(commentReplies[i] || []).length > 0 && (
-                          <div className="replies-list">
-                            {(commentReplies[i] || []).map((r, ri) => (
-                              <div key={ri} className="reply-item">
-                                <img src={r.avatar || DEFAULT_AVATAR} alt="avatar" className="reply-avatar" />
-                                <div className="reply-content">
-                                  <div className="reply-header">
-                                    <span className="reply-author">{r.author}</span>
-                                    <span className="comment-time">{r.time}</span>
-                                  </div>
-                                  <div className="comment-text">{r.text}</div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <CommentSection movieId={movie.id} limit={8} />
             </div>
 
           </div>

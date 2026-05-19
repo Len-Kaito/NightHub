@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FilterModal from '../components/FilterModal';
 import MovieCardVertical from '../components/MovieCardVertical';
+import CommentSection from '../components/CommentSection';
 
 // ─── SVG Icons ───────────────────────────────────────
 const IconPlay = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
@@ -16,7 +17,7 @@ const IconReply = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="no
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getMovieById, movies, addToMyList, removeFromMyList, isInMyList, getCommentsForMovie, addComment } = useContent();
+  const { getMovieById, movies, addToMyList, removeFromMyList, isInMyList } = useContent();
   const { profiles, activeProfileId } = useUser();
   const [isFilterActive, setIsFilterActive] = useState(false);
   
@@ -28,25 +29,7 @@ const MovieDetail = () => {
   ) : false;
 
   const [activeTab, setActiveTab] = useState(isMovieSeries ? 'episodes' : 'trailers');
-  const [commentText, setCommentText] = useState('');
   const [isTrailerOpen, setIsTrailerOpen] = useState(false);
-
-  const currentUser = profiles?.find(p => p.id === activeProfileId) || profiles?.[0] || { name: 'Guest', avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png' };
-  const commentsList = getCommentsForMovie?.(id) || [];
-
-  const handleAddComment = () => {
-    if (!commentText.trim()) return;
-    const newComment = {
-      id: Date.now().toString(),
-      author: currentUser.name,
-      time: 'Vừa xong',
-      text: commentText,
-      likes: 0,
-      avatar: currentUser.avatarUrl
-    };
-    addComment(id, newComment);
-    setCommentText('');
-  };
 
   // Cuộn lên đầu trang mỗi khi id thay đổi
   useEffect(() => {
@@ -204,38 +187,7 @@ const MovieDetail = () => {
               {/* TAB BÌNH LUẬN */}
               {activeTab === 'comments' && (
                 <div className="tab-pane active">
-                  <div className="comment-input-area" style={{ display: 'flex', gap: '12px', margin: '16px 0' }}>
-                    <img src={currentUser.avatarUrl} alt="Avatar" className="comment-avatar" />
-                    <div className="input-wrapper" style={{ flex: 1 }}>
-                      <textarea
-                        className="comment-input"
-                        placeholder="Thêm bình luận của bạn..."
-                        style={{ width: '100%', resize: 'vertical' }}
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                      ></textarea>
-                      <button className="btn-submit" style={{ marginTop: '8px' }} onClick={handleAddComment}>Đăng bình luận</button>
-                    </div>
-                  </div>
-
-                  <div className="comment-list">
-                    {commentsList.map(c => (
-                      <div key={c.id} className="comment-item">
-                        <img src={c.avatar} alt="Avatar" className="comment-avatar" />
-                        <div className="comment-content">
-                          <div className="comment-header">
-                            <span className="comment-author">{c.author}</span>
-                            <span className="comment-time">{c.time}</span>
-                          </div>
-                          <div className="comment-text">{c.text}</div>
-                          <div className="comment-actions">
-                            <button><IconLike /> {c.likes}</button>
-                            <button><IconReply /> Phản hồi</button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <CommentSection movieId={movie.id} />
                 </div>
               )}
             </div>

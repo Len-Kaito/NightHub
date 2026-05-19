@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useContent } from '../context/ContentContext';
@@ -17,6 +17,29 @@ const Navbar = ({ onToggleFilter }) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
       setIsSearchActive(false);
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsSearchActive(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleSearchIconClick = () => {
+    if (isSearchActive && searchQuery.trim()) {
+      setIsSearchActive(false);
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      setIsSearchActive(!isSearchActive);
     }
   };
 
@@ -44,11 +67,11 @@ const Navbar = ({ onToggleFilter }) => {
 
       <div className="nav-right">
         {/* Tìm Kiếm */}
-        <div className="search-wrapper" id="searchWrapper">
+        <div className="search-wrapper" id="searchWrapper" ref={searchRef}>
           <div className={`search-box ${isSearchActive ? 'active' : ''}`} id="searchBox">
             <button 
               className="search-trigger" 
-              onClick={() => setIsSearchActive(!isSearchActive)} 
+              onClick={handleSearchIconClick} 
               title="Tìm kiếm"
             >
               <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
@@ -78,7 +101,7 @@ const Navbar = ({ onToggleFilter }) => {
             {isSearchActive && searchQuery.trim().length > 0 && (
               <div className="search-dropdown" style={{
                 position: 'absolute', top: '100%', left: 0, right: 0, 
-                backgroundColor: 'var(--bg-card)', borderRadius: '8px', 
+                backgroundColor: 'var(--modal-bg)', borderRadius: '8px', 
                 marginTop: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', 
                 zIndex: 100, overflow: 'hidden'
               }}>

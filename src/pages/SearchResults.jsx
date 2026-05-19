@@ -61,7 +61,7 @@ const SearchResults = () => {
 
     // 4. Sorting
     if (sortFilter === 'popular' || sortFilter === 'views') {
-      result.sort((a, b) => parseInt(b.id.replace('m_','')) - parseInt(a.id.replace('m_','')));
+      result.sort((a, b) => parseInt(a.id.replace('m_','')) - parseInt(b.id.replace('m_','')));
     } else if (sortFilter === 'new') {
       result.sort((a, b) => parseInt(b.year || 0) - parseInt(a.year || 0));
     } else if (sortFilter === 'rating') {
