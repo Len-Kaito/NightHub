@@ -45,9 +45,11 @@ const MovieCardHorizontal = ({ movie }) => {
           <button className="action-btn play" title="Xem tiếp" onClick={handlePlay}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
           </button>
-          <button className={`action-btn bookmark-btn ${isSaved ? 'bookmarked' : ''}`} title={isSaved ? "Bỏ lưu" : "Lưu phim"} onClick={handleToggleList}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-          </button>
+          {isLoggedIn && (
+            <button className={`action-btn bookmark-btn ${isSaved ? 'bookmarked' : ''}`} title={isSaved ? "Bỏ lưu" : "Lưu phim"} onClick={handleToggleList}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+            </button>
+          )}
           <button className="action-btn info-btn" title="Chi tiết" onClick={handleInfo} style={{ marginLeft: 'auto' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
           </button>

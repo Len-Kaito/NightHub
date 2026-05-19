@@ -108,7 +108,7 @@ const Navbar = ({ onToggleFilter }) => {
                       onClick={() => {
                         setIsSearchActive(false);
                         setSearchQuery('');
-                        navigate(`/movie/${m.id}`);
+                        isLoggedIn ? navigate(`/movie/${m.id}`) : navigate('/login');
                       }}
                     >
                       <img 
@@ -141,7 +141,8 @@ const Navbar = ({ onToggleFilter }) => {
           </div>
         </div>
 
-        {/* Thông báo */}
+        {/* Thông báo - chỉ hiện khi đã đăng nhập */}
+        {isLoggedIn && (
         <div className="notification-wrapper">
           <div className="noti-btn-container" onClick={() => setIsNotiActive(!isNotiActive)}>
             <svg className="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
@@ -165,6 +166,7 @@ const Navbar = ({ onToggleFilter }) => {
             </div>
           </div>
         </div>
+        )}
 
         {/* User Menu / Login Button */}
         {!isLoggedIn ? (

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useChat } from '../../context/ChatContext';
+import { useUser } from '../../context/UserContext';
 
 const ChatBubble = () => {
     const location = useLocation();
     const { isChatOpen, setIsChatOpen, isBubbleEnabled } = useChat();
+    const { isLoggedIn } = useUser();
     
     // Hide on specific routes
     const hiddenRoutes = ['/login', '/register', '/switch-profile', '/choose-genre', '/forgot-password'];
@@ -161,7 +163,7 @@ const ChatBubble = () => {
         }
     };
 
-    if (isHidden || !isBubbleEnabled) return null;
+    if (isHidden || !isBubbleEnabled || !isLoggedIn) return null;
 
     return (
         <div 
