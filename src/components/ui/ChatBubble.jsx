@@ -7,7 +7,7 @@ const ChatBubble = () => {
     const { isChatOpen, setIsChatOpen, isBubbleEnabled } = useChat();
     
     // Hide on specific routes
-    const hiddenRoutes = ['/login', '/register', '/switch-profile', '/genres'];
+    const hiddenRoutes = ['/login', '/register', '/switch-profile', '/choose-genre', '/forgot-password'];
     const isHidden = hiddenRoutes.some(route => location.pathname.includes(route));
 
     // Chat state

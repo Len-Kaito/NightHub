@@ -19,7 +19,9 @@
     padding: 60px 20px 40px 20px !important;
     margin: 0 !important;
     max-width: 100%;
+    box-sizing: border-box;
     overflow-y: auto;
+    
 }
 
 /* Nút quay lại trang chủ ở góc trái trên cùng */
@@ -56,6 +58,7 @@
     -webkit-backdrop-filter: blur(15px);
     margin-bottom: auto;
     box-sizing: border-box;
+    
 }
 
 .auth-page-container .card-title {

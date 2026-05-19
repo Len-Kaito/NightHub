@@ -88,7 +88,7 @@ const MovieCardVertical = ({ movie, index, isTop10, showMatch }) => {
           </button>
         </div>
         <div className="card-meta-info">
-          {showMatch && <span className="card-meta-match">98% Match</span>}
+          {showMatch && <span className="card-meta-match">98% phù hợp</span>}
           {movie.quality && <span className="card-meta-quality">{movie.quality}</span>}
           {movie.duration && <span className="card-meta-duration">{movie.duration}</span>}
         </div>

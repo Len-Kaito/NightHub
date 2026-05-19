@@ -99,25 +99,17 @@ const Navbar = ({ onToggleFilter }) => {
             
             {/* Live Search Dropdown */}
             {isSearchActive && searchQuery.trim().length > 0 && (
-              <div className="search-dropdown" style={{
-                position: 'absolute', top: '100%', left: 0, right: 0, 
-                backgroundColor: 'var(--modal-bg)', borderRadius: '8px', 
-                marginTop: '10px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', 
-                zIndex: 100, overflow: 'hidden'
-              }}>
+              <div className="search-dropdown">
                 {searchResults.length > 0 ? (
                   searchResults.map(m => (
                     <div 
                       key={m.id} 
                       className="search-dropdown-item"
-                      style={{ padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
                       onClick={() => {
                         setIsSearchActive(false);
                         setSearchQuery('');
                         navigate(`/movie/${m.id}`);
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                       <img 
                         src={m.posterHorizontal || m.posterVertical || m.backdropUrl || '/images/poster_1.jpeg'} 
@@ -125,7 +117,7 @@ const Navbar = ({ onToggleFilter }) => {
                         style={{ width: '50px', height: '35px', objectFit: 'cover', borderRadius: '4px' }}
                       />
                       <div style={{ flex: 1, overflow: 'hidden' }}>
-                        <div style={{ fontSize: '14px', fontWeight: '500', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{m.title}</div>
+                        <div className="sd-title">{m.title}</div>
                         <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{m.year || ''} {m.genres ? `· ${m.genres[0]}` : ''}</div>
                       </div>
                     </div>
@@ -136,13 +128,11 @@ const Navbar = ({ onToggleFilter }) => {
                   </div>
                 )}
                 <div 
-                  style={{ padding: '10px', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.05)', fontSize: '13px', cursor: 'pointer', color: 'var(--accent-color)' }}
+                  className="search-dropdown-footer"
                   onClick={() => {
                     setIsSearchActive(false);
                     navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
                 >
                   Xem tất cả kết quả
                 </div>
