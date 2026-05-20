@@ -40,10 +40,10 @@ const SearchResults = () => {
     // 2. Filter by Category (AND)
     if (categoryFilter && categoryFilter !== 'Tất cả') {
       const catMap = {
-        'Phim điện ảnh': 'dien-anh',
-        'Phim truyền hình': 'truyen-hinh',
+        'Phim điện ảnh': 'phim-dien-anh',
+        'Phim truyền hình': 'phim-truyen-hinh',
         'Phim hoạt hình': 'hoat-hinh',
-        'Phim tài liệu': 'tai-lieu'
+        'Phim tài liệu': 'phim-tai-lieu'
       };
       const jsonCat = catMap[categoryFilter];
       if (jsonCat) {

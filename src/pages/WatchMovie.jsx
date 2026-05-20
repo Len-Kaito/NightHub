@@ -34,8 +34,7 @@ const WatchMovie = () => {
 
   const isMovieSeries = movie ? (
     String(movie.duration || '').toLowerCase().includes('tập') ||
-    movie.category === 'truyen-hinh' ||
-    (movie.tags && movie.tags.some(t => t.toLowerCase().includes('dài tập') || t.toLowerCase().includes('truyền hình')))
+    movie.category === 'phim-truyen-hinh'
   ) : false;
 
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -77,16 +76,15 @@ const WatchMovie = () => {
     }
   };
 
-  const relatedMovies = getMoviesByTag('Đề xuất cho bạn').filter(m => m.id !== movie.id);
+  const relatedMovies = movies.filter(m => 
+    m.id !== movie.id && 
+    (m.category === movie.category || (m.genres && movie.genres && m.genres.some(g => movie.genres.includes(g))))
+  ).slice(0, 12);
 
   const top10Movies = movies.filter(m => {
     if (m.id === movie.id) return false;
-    const isMSeries = (
-      String(m.duration || '').toLowerCase().includes('tập') ||
-      m.category === 'truyen-hinh' ||
-      (m.tags && m.tags.some(t => t.toLowerCase().includes('dài tập') || t.toLowerCase().includes('truyền hình')))
-    );
-    return !isMSeries && (m.category === 'trang-chu' || m.category === 'hoat-hinh');
+    const isMSeries = String(m.duration || '').toLowerCase().includes('tập') || m.category === 'phim-truyen-hinh';
+    return !isMSeries;
   }).slice(0, 10);
 
   const formatTime = (secs) => {
@@ -202,7 +200,7 @@ const WatchMovie = () => {
                 ref={videoRef}
                 className="main-video"
                 src="/video/videoplayback.mp4"
-                poster={movie.posterVertical || POSTER}
+                poster={movie.backdropUrl || movie.posterHorizontal || POSTER}
                 onTimeUpdate={handleTimeUpdate}
                 disablePictureInPicture
                 disableRemotePlayback
@@ -492,7 +490,7 @@ const WatchMovie = () => {
                       onClick={() => setActiveEpisode(ep.id)}
                     >
                       <img
-                        src={movie.posterVertical || POSTER}
+                        src={movie.posterHorizontal || movie.backdropUrl || POSTER}
                         alt={`Ep ${ep.id}`}
                         className="ep-img"
                         onError={e => { e.target.src = POSTER; }}

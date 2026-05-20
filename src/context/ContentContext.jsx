@@ -10,7 +10,7 @@ export const useContent = () => {
   return context;
 };
 
-import generatedMovies from '../data/generatedMovies.json';
+import generatedMovies, { homeRows } from '../data/movieData';
 import { AVATARS } from './UserContext';
 
 // --- DEMO USER PROFILES (for comment avatar click) ---
@@ -88,7 +88,8 @@ export const ContentProvider = ({ children }) => {
   const getMoviesByTag = (tag) => movies.filter(m => m.tags?.includes(tag));
   const getMovieById = (id) => movies.find(m => m.id === id) || null;
   const continueWatchingList = React.useMemo(() => {
-    const cwMovies = movies.filter(m => m.tags?.includes('Tiếp tục xem'));
+    const cwRow = homeRows.find(r => r.title === 'Tiếp tục xem');
+    const cwMovies = cwRow ? cwRow.movies.map(id => getMovieById(id)).filter(Boolean) : [];
     return cwMovies.map((movie, index) => ({
       ...movie,
       progress: [45, 80, 25, 60, 30, 90, 15, 75][index % 8],

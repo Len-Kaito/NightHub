@@ -12,48 +12,19 @@ const ageTooltips = {
   'T18': 'Phim dành cho người từ 18 tuổi trở lên',
 };
 
+import { getMovies } from '../data/movieData';
+
+const movies = getMovies();
+const findMovie = (title) => movies.find(m => m.title === title) || {};
+
 // Default hero images cho trang chủ
 const defaultHeroImages = [
-  {
-    id: 'm_37',
-    url: '/DanhMuc/Trang chủ/Poster/Alice In Borderland.jpg',
-    title: 'Alice in Borderland',
-    year: '2020', age: 'T18', duration: '2 Mùa', quality: '2K', rating: '4.8/5.0',
-    description: 'Một thanh niên nghiện game và hai người bạn bị mắc kẹt ở một phiên bản kỳ lạ của Tokyo, nơi họ phải tham gia những trò chơi sinh tử nguy hiểm để sinh tồn.',
-    badges: [{ label: 'Tập mới', type: 'new' }, { label: 'Vietsub', type: 'glass' }],
-  },
-  {
-    id: 'm_129',
-    url: '/DanhMuc/Trang chủ/Poster/JigSaw 10.jpg',
-    title: 'Saw X',
-    year: '2023', age: 'T18', duration: '1h 58m', quality: '2K', rating: '4.5/5.0',
-    description: 'Bị bệnh và tuyệt vọng, John Kramer tới Mexico để thực hiện một thủ thuật y tế rủi ro và thử nghiệm với hy vọng có được phương pháp chữa trị kỳ diệu cho căn bệnh ung thư của mình.',
-    badges: [{ label: 'T18', type: 'age' }, { label: 'Full HD', type: 'quality' }],
-  },
-  {
-    url: '/DanhMuc/Trang chủ/Poster/Marty Supreme.jpg',
-    title: 'Marty Supreme',
-    year: '2024', age: 'T16', duration: '1h 45m', quality: 'Full HD', rating: '4.2/5.0',
-    description: 'Câu chuyện kể về cuộc đời của một tay chơi bóng bàn chuyên nghiệp và những góc khuất trong sự nghiệp của anh.',
-    badges: [{ label: 'Thuyết Minh', type: 'glass' }],
-  },
-  {
-    id: 'm_99',
-    url: '/DanhMuc/Trang chủ/Poster/Ở Nhà Một Mình.jpg',
-    title: 'Home Alone',
-    year: '1990', age: 'P', duration: '1h 43m', quality: 'Full HD', rating: '4.9/5.0',
-    description: 'Cậu bé 8 tuổi rắc rối vô tình bị bỏ lại một mình ở nhà trong kỳ nghỉ lễ Giáng sinh và phải bảo vệ ngôi nhà khỏi hai tên trộm ngốc nghếch.',
-    badges: [{ label: 'Cổ điển', type: 'new' }, { label: 'Thuyết Minh', type: 'glass' }],
-  },
-  {
-    id: 'm_41',
-    url: '/DanhMuc/Trang chủ/Poster/Sweet Home.jpg',
-    title: 'Sweet Home',
-    year: '2020', age: 'T18', duration: '3 Mùa', quality: '2K', rating: '4.7/5.0',
-    description: 'Khi con người biến thành những con quái vật tàn bạo đại diện cho những ham muốn sâu kín nhất của họ, một thanh niên rắc rối và những người hàng xóm trong chung cư phải chiến đấu để sinh tồn.',
-    badges: [{ label: 'Tập mới', type: 'new' }, { label: 'T18', type: 'age' }],
-  }
-];
+  { ...findMovie('Khi Cuộc Đời Cho Bạn Quả Quýt'), url: findMovie('Khi Cuộc Đời Cho Bạn Quả Quýt')?.posterHorizontal },
+  { ...findMovie('Mưa đỏ'), url: findMovie('Mưa đỏ')?.posterHorizontal },
+  { ...findMovie('Mắt biếc'), url: findMovie('Mắt biếc')?.posterHorizontal },
+  { ...findMovie('One Piece'), url: findMovie('One Piece')?.posterHorizontal },
+  { ...findMovie('Queen Of Tears'), url: findMovie('Queen Of Tears')?.posterHorizontal }
+].filter(m => m.id);
 
 const HeroSlider = ({ images }) => {
   const heroImages = images || defaultHeroImages;

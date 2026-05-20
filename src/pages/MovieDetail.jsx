@@ -24,8 +24,7 @@ const MovieDetail = () => {
   const movie = getMovieById(id) || movies[0];
   const isMovieSeries = movie ? (
     String(movie.duration || '').toLowerCase().includes('tập') ||
-    movie.category === 'truyen-hinh' ||
-    (movie.tags && movie.tags.some(t => t.toLowerCase().includes('dài tập') || t.toLowerCase().includes('truyền hình')))
+    movie.category === 'phim-truyen-hinh'
   ) : false;
 
   const [activeTab, setActiveTab] = useState(isMovieSeries ? 'episodes' : 'trailers');

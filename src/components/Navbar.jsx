@@ -156,7 +156,7 @@ const Navbar = ({ onToggleFilter }) => {
             <div className="noti-header">Thông báo<span style={{cursor: 'pointer'}} onClick={() => setIsNotiRead(true)}>Đánh dấu đã đọc</span></div>
             <div className="noti-list">
               <div className={`noti-item ${isNotiRead ? '' : 'unread'}`}>
-                <img src="/DanhMuc/Trang chủ/Tiếp tục xem/One Piece.jpg" alt="Phim" className="noti-img" />
+                <img src="/DanhMuc/Trang chủ/Tiếp tục xem/One Piece _ ngang.jpg" alt="Phim" className="noti-img" />
                 <div className="noti-content">
                   <div className="noti-title">Tập mới đã có sẵn!</div>
                   <div className="noti-desc">One Piece (Tập 1089) vừa được cập nhật. Xem ngay nào!</div>
