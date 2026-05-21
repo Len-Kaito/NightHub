@@ -305,7 +305,7 @@ const Profile = () => {
                 <div className="setting-row-item">
                   <div className="setting-info">
                     <h4>{tempPin ? <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>Mã PIN <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" strokeWidth="2"><path d="M20 6L9 17l-5-5"></path></svg></span> : 'Mã PIN'}</h4>
-                    <p>Bảo vệ hồ sơ bằng mã PIN 4 số</p>
+                    <p>Khi đặt mã PIN, người dùng sẽ được khóa bằng mã PIN 4 số</p>
                   </div>
                   <button
                     type="button"
@@ -336,34 +336,36 @@ const Profile = () => {
       {/* PIN MODAL */}
       {showPinModal && (
         <div className="modal-overlay animate-fade-in" onClick={e => { if (e.target === e.currentTarget) setShowPinModal(false); }}>
-          <div className="modal-box modal-sm">
-            <div className="modal-header">
-              <h2>{pinStep === 1 ? 'Nhập mã PIN mới' : 'Xác nhận mã PIN'}</h2>
-              <button onClick={() => setShowPinModal(false)} className="btn-icon">
-                <img src="https://cdn-icons-png.flaticon.com/512/2961/2961937.png" alt="Đóng" />
-              </button>
+          <div className="modal-box modal-sm pin-wrapper">
+            <button onClick={() => setShowPinModal(false)} className="btn-icon" style={{ position: 'absolute', top: 16, right: 16 }}>
+              <img src="https://cdn-icons-png.flaticon.com/512/2961/2961937.png" alt="Đóng" />
+            </button>
+            <div className="pin-icon-box">
+              <img src="https://cdn-icons-png.flaticon.com/512/3064/3064155.png" alt="Khóa" />
             </div>
-            <div className="modal-body" style={{ textAlign: 'center' }}>
-              <p style={{ marginBottom: '20px', color: 'var(--text-muted)' }}>
-                {pinStep === 1 ? 'Đặt mã PIN 4 số để bảo vệ hồ sơ của bạn' : 'Nhập lại mã PIN để xác nhận'}
-              </p>
-              <div className="pin-inputs">
-                {pinArray.map((digit, i) => (
-                  <input
-                    key={i}
-                    ref={pinRefs[i]}
-                    type="password"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    className="pin-box"
-                    onChange={e => handlePinInput(e.target.value, i)}
-                    onKeyDown={e => handlePinKey(e, i)}
-                  />
-                ))}
-              </div>
-              {pinError && <div style={{ color: 'var(--accent-red)', fontSize: '13px', marginTop: '12px', fontWeight: 500 }}>{pinError}</div>}
+            <h2 className="pin-title">
+              {pinStep === 1 ? 'Đặt mã PIN' : 'Xác nhận mã PIN'}
+            </h2>
+            <p className="pin-desc" style={{ color: 'var(--text-muted)', marginBottom: pinError ? 16 : 32 }}>
+              {pinStep === 1 ? 'Tạo mã PIN 4 số để bảo vệ hồ sơ' : 'Vui lòng nhập lại mã PIN để xác nhận'}
+            </p>
+            {pinError && <div style={{ color: 'var(--accent-red)', fontSize: '14px', marginBottom: '16px', fontWeight: 500 }}>{pinError}</div>}
+            <div className="pin-inputs-container">
+              {[0, 1, 2, 3].map(i => (
+                <input
+                  key={i}
+                  ref={pinRefs[i]}
+                  type="password"
+                  inputMode="numeric"
+                  maxLength="1"
+                  className="pin-input"
+                  value={pinArray[i]}
+                  onChange={e => handlePinInput(e.target.value, i)}
+                  onKeyDown={e => handlePinKey(e, i)}
+                />
+              ))}
             </div>
+            <div className="pin-footer">Ghi nhớ mã PIN của bạn để truy cập</div> 
           </div>
         </div>
       )}

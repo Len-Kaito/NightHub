@@ -303,9 +303,18 @@ header {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
 }
 
-.player-wrapper:hover .player-bottom-overlay,
+.player-wrapper:hover:not(.is-idle) .player-bottom-overlay,
 .player-wrapper.force-show-controls .player-bottom-overlay {
     opacity: 1;
+}
+
+.player-wrapper.is-idle {
+    cursor: none !important;
+}
+
+.player-wrapper.is-idle .player-bottom-overlay {
+    opacity: 0 !important;
+    pointer-events: none;
 }
 
 .player-controls-row {
@@ -4602,7 +4611,6 @@ header {
     font-weight: 600;
     color: white;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -4610,7 +4618,18 @@ header {
     transition: background 0.2s;
 }
 
-.menu-back:hover {
+.back-clickable {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 4px;
+    margin-left: -4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.back-clickable:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useChat } from '../../context/ChatContext';
 import { useUser } from '../../context/UserContext';
+import { useToast } from '../../context/ToastContext';
 import CustomSelect from '../ui/CustomSelect';
 
 const SUBTITLE_SIZES = [
@@ -14,7 +15,8 @@ const SUBTITLE_SIZES = [
 const PersonalizationTab = ({ isActive }) => {
     const { theme, setTheme } = useTheme();
     const { isBubbleEnabled, toggleBubbleEnabled } = useChat();
-    const { showSkipIntro, setShowSkipIntro, autoPlayNext, setAutoPlayNext } = useUser();
+    const { showSkipIntro, setShowSkipIntro, autoPlayNext, setAutoPlayNext, subtitleSize, setSubtitleSize } = useUser();
+    const { showToast } = useToast();
 
     const handleThemeChange = (value) => {
         if (value === 'dark') {
@@ -59,7 +61,6 @@ const PersonalizationTab = ({ isActive }) => {
 
     // Subtitle customization modal
     const [isSubModalOpen, setIsSubModalOpen] = useState(false);
-    const [subtitleSize, setSubtitleSize] = useState('medium');
     const [tempSubSize, setTempSubSize] = useState('medium');
 
     const openSubModal = () => {
@@ -70,6 +71,7 @@ const PersonalizationTab = ({ isActive }) => {
     const saveSubModal = () => {
         setSubtitleSize(tempSubSize);
         setIsSubModalOpen(false);
+        showToast('Đã lưu thay đổi giao diện phụ đề!');
     };
 
     const currentSizeObj = SUBTITLE_SIZES.find(s => s.value === tempSubSize) || SUBTITLE_SIZES[1];

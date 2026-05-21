@@ -54,6 +54,10 @@ export const UserProvider = ({ children }) => {
         return saved !== 'false'; // default true
     });
 
+    const [subtitleSize, setSubtitleSize] = useState(() => {
+        return localStorage.getItem('nighthub_subtitle_size') || 'medium';
+    });
+
     const login = () => {
         setIsLoggedIn(true);
         localStorage.setItem('nighthub_is_logged_in', 'true');
@@ -95,6 +99,10 @@ export const UserProvider = ({ children }) => {
         localStorage.setItem('nighthub_autoplay_next', autoPlayNext);
     }, [autoPlayNext]);
 
+    useEffect(() => {
+        localStorage.setItem('nighthub_subtitle_size', subtitleSize);
+    }, [subtitleSize]);
+
     const switchProfile = (id) => {
         const profile = profiles.find(p => p.id === id);
         if (profile) {
@@ -128,7 +136,8 @@ export const UserProvider = ({ children }) => {
             switchProfile, addProfile, updateProfile, deleteProfile,
             isLoggedIn, login, logout,
             showSkipIntro, setShowSkipIntro,
-            autoPlayNext, setAutoPlayNext
+            autoPlayNext, setAutoPlayNext,
+            subtitleSize, setSubtitleSize
         }}>
             {children}
         </UserContext.Provider>

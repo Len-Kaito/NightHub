@@ -15,7 +15,7 @@ const DEFAULT_AVATAR = 'https://static2.vieon.vn/vieplay-image/profile_avatar/20
 const WatchMovie = () => {
   const { id } = useParams();
   const { movies, getMovieById, getMoviesByTag, addToMyList, removeFromMyList, isInMyList } = useContent();
-  const { profiles, activeProfileId, isLoggedIn, showSkipIntro, autoPlayNext } = useUser();
+  const { profiles, activeProfileId, isLoggedIn, showSkipIntro, autoPlayNext, subtitleSize, setSubtitleSize } = useUser();
   const currentUser = profiles?.find(p => p.id === activeProfileId) || profiles?.[0] || null;
 
   const movie = getMovieById(id) || {
@@ -63,6 +63,36 @@ const WatchMovie = () => {
   const [audioMode, setAudioMode] = useState('Tiếng Việt');
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [qualityMode, setQualityMode] = useState('Tự động');
+  const [isIdle, setIsIdle] = useState(false);
+  const idleTimerRef = useRef(null);
+
+  useEffect(() => {
+    const handleUserActivity = () => {
+      setIsIdle(false);
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = setTimeout(() => {
+        setIsIdle(true);
+      }, 3000);
+    };
+
+    const playerEl = document.getElementById('playerWrapper');
+    if (playerEl) {
+      playerEl.addEventListener('mousemove', handleUserActivity);
+      playerEl.addEventListener('mousedown', handleUserActivity);
+      playerEl.addEventListener('keydown', handleUserActivity);
+      // Initiate timer
+      handleUserActivity();
+    }
+
+    return () => {
+      clearTimeout(idleTimerRef.current);
+      if (playerEl) {
+        playerEl.removeEventListener('mousemove', handleUserActivity);
+        playerEl.removeEventListener('mousedown', handleUserActivity);
+        playerEl.removeEventListener('keydown', handleUserActivity);
+      }
+    };
+  }, []);
 
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -236,7 +266,7 @@ const WatchMovie = () => {
           <div className="watch-main">
 
             {/* VIDEO PLAYER */}
-            <div className="player-wrapper" id="playerWrapper">
+            <div className={`player-wrapper ${isIdle ? 'is-idle' : ''}`} id="playerWrapper">
               <video
                 ref={videoRef}
                 className="main-video"
@@ -258,7 +288,9 @@ const WatchMovie = () => {
 
               {/* SUBTITLE OVERLAY */}
               <div className="subtitle-overlay" id="subtitleOverlay" style={{ display: subtitleMode !== 'Tắt' ? 'block' : 'none' }}>
-                <span className="subtitle-text">Đây là một đoạn phụ đề mẫu đang hiển thị...</span>
+                <span className="subtitle-text" style={{ fontSize: subtitleSize === 'small' ? '14px' : subtitleSize === 'large' ? '28px' : '20px' }}>
+                  Đây là một đoạn phụ đề mẫu đang hiển thị...
+                </span>
               </div>
 
               {/* BỎ QUA ĐOẠN GIỚI THIỆU */}
@@ -393,25 +425,61 @@ const WatchMovie = () => {
 
                         {/* SUB-PANELS */}
                         <div className={`menu-panel ${activeSettingsPanel === 'subtitle' ? 'active' : ''}`}>
-                          <div className="menu-back" onClick={() => setActiveSettingsPanel('main')}><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Phụ đề</div>
+                          <div className="menu-back">
+                            <span className="back-clickable" onClick={() => setActiveSettingsPanel('main')}>
+                              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Phụ đề
+                            </span>
+                            <span 
+                              style={{ position: 'absolute', right: '15px', textDecoration: 'underline', cursor: 'pointer', fontSize: '13px', color: 'inherit' }}
+                              onClick={(e) => { e.stopPropagation(); setActiveSettingsPanel('subtitle-size'); }}
+                            >
+                              Kích thước
+                            </span>
+                          </div>
                           {['Tiếng Việt', 'Tiếng Anh', 'Tắt'].map(opt => (
                             <div key={opt} className={`setting-option ${subtitleMode === opt ? 'selected' : ''}`} onClick={() => setSubtitleMode(opt)}>{opt}</div>
                           ))}
                         </div>
+                        <div className={`menu-panel ${activeSettingsPanel === 'subtitle-size' ? 'active' : ''}`}>
+                          <div className="menu-back">
+                            <span className="back-clickable" onClick={() => setActiveSettingsPanel('subtitle')}>
+                              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Kích thước phụ đề
+                            </span>
+                          </div>
+                          {[
+                            { label: 'Nhỏ', value: 'small' },
+                            { label: 'Vừa', value: 'medium' },
+                            { label: 'Lớn', value: 'large' }
+                          ].map(opt => (
+                            <div key={opt.value} className={`setting-option ${subtitleSize === opt.value ? 'selected' : ''}`} onClick={() => setSubtitleSize(opt.value)}>{opt.label}</div>
+                          ))}
+                        </div>
                         <div className={`menu-panel ${activeSettingsPanel === 'audio' ? 'active' : ''}`}>
-                          <div className="menu-back" onClick={() => setActiveSettingsPanel('main')}><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Âm thanh</div>
+                          <div className="menu-back">
+                            <span className="back-clickable" onClick={() => setActiveSettingsPanel('main')}>
+                              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Âm thanh
+                            </span>
+                          </div>
                           {['Tiếng Việt', 'Tiếng Anh'].map(opt => (
                             <div key={opt} className={`setting-option ${audioMode === opt ? 'selected' : ''}`} onClick={() => setAudioMode(opt)}>{opt}</div>
                           ))}
                         </div>
                         <div className={`menu-panel ${activeSettingsPanel === 'speed' ? 'active' : ''}`}>
-                          <div className="menu-back" onClick={() => setActiveSettingsPanel('main')}><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Tốc độ phát</div>
+                          <div className="menu-back">
+                            <span className="back-clickable" onClick={() => setActiveSettingsPanel('main')}>
+                              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Tốc độ phát
+                            </span>
+                          </div>
                           {[0.5, 0.75, 1, 1.25, 1.5, 2].map(opt => (
                             <div key={opt} className={`setting-option ${playbackSpeed === opt ? 'selected' : ''}`} onClick={() => handleSpeedChange(opt)}>{opt === 1 ? 'Chuẩn' : `${opt}x`}</div>
                           ))}
                         </div>
                         <div className={`menu-panel ${activeSettingsPanel === 'quality' ? 'active' : ''}`}>
-                          <div className="menu-back" onClick={() => setActiveSettingsPanel('main')}><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Chất lượng</div>
+                          <div className="menu-back">
+                            <span className="back-clickable" onClick={() => setActiveSettingsPanel('main')}>
+                              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg> Chất lượng
+                            </span>
+                          </div>
                           {['2K Ultra HD', '1080p Premium', '1080p', '720p', '480p', '360p', 'Tự động'].map(opt => (
                             <div key={opt} className={`setting-option ${qualityMode === opt ? 'selected' : ''}`} onClick={() => setQualityMode(opt)}>{opt}</div>
                           ))}

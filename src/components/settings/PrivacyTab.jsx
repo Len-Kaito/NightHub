@@ -3,12 +3,7 @@ import CustomSelect from '../ui/CustomSelect';
 import ConfirmModal from '../ui/ConfirmModal';
 import CustomDatePicker from '../ui/CustomDatePicker';
 import { useToast } from '../../context/ToastContext';
-
-const MOCK_MOVIES = [
-    { id: 1, title: 'Stranger Things (Season 4)', episode: 'Tập 8', progress: 50, thumb: 'https://static2.vieon.vn/vieplay-image/thumbnail_v4/2024/02/16/z129n3u5_1920x1080_maixabian_764_430.webp' },
-    { id: 2, title: 'Mai', episode: '', progress: 100, thumb: 'https://static2.vieon.vn/vieplay-image/thumbnail_v4/2024/03/15/8e4u5x2o_1920x1080_latmat6_764_430.webp' },
-    { id: 3, title: 'Lật Mặt 6', episode: '', progress: 15, thumb: 'https://static2.vieon.vn/vieplay-image/thumbnail_v4/2023/10/04/l7q2p8k4_1920x1080_nha_ba_nu_764_430.webp' },
-];
+import { useContent } from '../../context/ContentContext';
 
 const PrivacyTab = ({ isActive }) => {
     const deleteOptions = [
@@ -23,6 +18,7 @@ const PrivacyTab = ({ isActive }) => {
     const [dateTo, setDateTo] = useState('');
     const [modalState, setModalState] = useState({ isOpen: false, type: '', title: '', desc: '' });
     const { showToast } = useToast();
+    const { movies } = useContent();
 
     const openModal = (type, title, desc) => {
         setModalState({ isOpen: true, type, title, desc });
@@ -61,17 +57,44 @@ const PrivacyTab = ({ isActive }) => {
     const isDeleteDisabled = deleteOption === 'range' && rangePreviewState !== 3;
 
     const previewLabels = {
-        today: 'Sẽ xóa các phim đã xem hôm nay:',
-        '7days': 'Sẽ xóa các phim đã xem trong 7 ngày qua:',
-        '30days': 'Sẽ xóa các phim đã xem trong 30 ngày qua:',
+        today: 'Sẽ xóa các phim đã xem hôm nay (10% lịch sử):',
+        '7days': 'Sẽ xóa các phim đã xem trong 7 ngày qua (50% lịch sử):',
+        '30days': 'Sẽ xóa các phim đã xem trong 30 ngày qua (90% lịch sử):',
         range: 'Sẽ xóa các phim sau:',
     };
+
+    const fullHistory = movies.slice(0, 10).map((m, i) => ({
+        id: m.id,
+        title: m.title,
+        thumb: m.backdropUrl || m.posterHorizontal,
+        episode: m.episodes ? 'Tập ' + (i + 1) : '',
+        progress: Math.floor(Math.random() * 80) + 10
+    }));
+
+    let previewMovies = [];
+    if (showPreviewList) {
+        if (deleteOption === 'today') {
+            previewMovies = fullHistory.slice(0, 1);
+        } else if (deleteOption === '7days') {
+            previewMovies = fullHistory.slice(0, 5);
+        } else if (deleteOption === '30days') {
+            previewMovies = fullHistory.slice(0, 9);
+        } else if (deleteOption === 'range' && rangePreviewState === 3) {
+            const daysDiff = (dTo - dFrom) / (1000 * 60 * 60 * 24);
+            if (daysDiff > 30) {
+                previewMovies = fullHistory; // 100%
+            } else {
+                const count = Math.max(1, Math.ceil(10 * (Math.max(1, daysDiff) / 30)));
+                previewMovies = fullHistory.slice(0, count);
+            }
+        }
+    }
 
     // Render danh sách phim preview (dùng chung cho mọi option trừ 'all')
     const renderMovieList = () => (
         <div style={{ maxHeight: '250px', overflowY: 'auto', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', marginBottom: '15px' }}>
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '10px', padding: '0 5px' }}>{previewLabels[deleteOption]}</p>
-            {MOCK_MOVIES.map(movie => (
+            {previewMovies.map(movie => (
                 <div key={movie.id} style={{ display: 'flex', gap: '15px', padding: '10px', borderBottom: '1px solid var(--border-color)' }}>
                     <div style={{ flexShrink: 0, width: '120px', aspectRatio: '16/9', borderRadius: '6px', overflow: 'hidden', background: 'var(--always-black)' }}>
                         <img src={movie.thumb} alt={movie.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
