@@ -79,7 +79,6 @@ const WatchMovie = () => {
     if (playerEl) {
       playerEl.addEventListener('mousemove', handleUserActivity);
       playerEl.addEventListener('mousedown', handleUserActivity);
-      playerEl.addEventListener('keydown', handleUserActivity);
       // Initiate timer
       handleUserActivity();
     }
@@ -89,7 +88,6 @@ const WatchMovie = () => {
       if (playerEl) {
         playerEl.removeEventListener('mousemove', handleUserActivity);
         playerEl.removeEventListener('mousedown', handleUserActivity);
-        playerEl.removeEventListener('keydown', handleUserActivity);
       }
     };
   }, []);
@@ -178,6 +176,44 @@ const WatchMovie = () => {
     seekTimeout.current = setTimeout(() => setSeekIndicator({ show: false, text: '' }), 600);
   };
   const toggleMute = () => { if (videoRef.current) videoRef.current.muted = !isMuted; setIsMuted(!isMuted); };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      
+      switch(e.code) {
+        case 'Space':
+        case 'KeyK':
+          e.preventDefault();
+          togglePlay();
+          break;
+        case 'KeyF':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+        case 'KeyM':
+          e.preventDefault();
+          toggleMute();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          seek(10);
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          seek(-10);
+          break;
+      }
+      
+      // Wake up UI on key press
+      setIsIdle(false);
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = setTimeout(() => setIsIdle(true), 3000);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, isMuted]);
   
   const handleVolumeChange = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
