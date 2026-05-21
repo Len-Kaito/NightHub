@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FilterModal from '../components/FilterModal';
 import { useContent } from '../context/ContentContext';
 import { useUser } from '../context/UserContext';
+import { homeRows } from '../data/movieData';
 import MovieCardVertical from '../components/MovieCardVertical';
 import CommentSection from '../components/CommentSection';
 
@@ -13,7 +14,7 @@ const DEFAULT_AVATAR = 'https://static2.vieon.vn/vieplay-image/profile_avatar/20
 
 const WatchMovie = () => {
   const { id } = useParams();
-  const { movies, getMovieById, getMoviesByTag } = useContent();
+  const { movies, getMovieById, getMoviesByTag, addToMyList, removeFromMyList, isInMyList } = useContent();
   const { profiles, activeProfileId, isLoggedIn, showSkipIntro, autoPlayNext } = useUser();
   const currentUser = profiles?.find(p => p.id === activeProfileId) || profiles?.[0] || null;
 
@@ -47,7 +48,6 @@ const WatchMovie = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [activeSettingsPanel, setActiveSettingsPanel] = useState('main');
   const [ccEnabled, setCcEnabled] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
   const [rating, setRating] = useState(0);
   const [ratedLocked, setRatedLocked] = useState(false);
   const [commentText, setCommentText] = useState('');
@@ -76,16 +76,57 @@ const WatchMovie = () => {
     }
   };
 
+  const isBookmarked = isInMyList(movie.id);
+  const toggleBookmark = () => {
+    if (isBookmarked) {
+      removeFromMyList(movie.id);
+    } else {
+      addToMyList(movie.id);
+    }
+  };
+
   const relatedMovies = movies.filter(m => 
     m.id !== movie.id && 
     (m.category === movie.category || (m.genres && movie.genres && m.genres.some(g => movie.genres.includes(g))))
   ).slice(0, 12);
 
-  const top10Movies = movies.filter(m => {
-    if (m.id === movie.id) return false;
-    const isMSeries = String(m.duration || '').toLowerCase().includes('tập') || m.category === 'phim-truyen-hinh';
-    return !isMSeries;
-  }).slice(0, 10);
+  const getRandomMovies = (sourceList, count, excludeIdsSet) => {
+    const candidates = sourceList.filter(m => !excludeIdsSet.has(m.id));
+    const shuffled = [...candidates].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
+  const top10Movies = useMemo(() => {
+    const selectedMovies = [];
+    const excludeIds = new Set([movie.id]);
+
+    const homeMovieIds = Array.from(new Set(homeRows.flatMap(row => row.movies)));
+    const homeMovies = movies.filter(m => homeMovieIds.includes(m.id));
+    getRandomMovies(homeMovies, 4, excludeIds).forEach(m => {
+      selectedMovies.push(m);
+      excludeIds.add(m.id);
+    });
+
+    const animeMovies = movies.filter(m => m.category === 'hoat-hinh');
+    getRandomMovies(animeMovies, 2, excludeIds).forEach(m => {
+      selectedMovies.push(m);
+      excludeIds.add(m.id);
+    });
+
+    const dienAnhMovies = movies.filter(m => m.category === 'phim-dien-anh');
+    getRandomMovies(dienAnhMovies, 2, excludeIds).forEach(m => {
+      selectedMovies.push(m);
+      excludeIds.add(m.id);
+    });
+
+    const truyenHinhMovies = movies.filter(m => m.category === 'phim-truyen-hinh');
+    getRandomMovies(truyenHinhMovies, 2, excludeIds).forEach(m => {
+      selectedMovies.push(m);
+      excludeIds.add(m.id);
+    });
+
+    return selectedMovies;
+  }, [movie.id, movies, homeRows]);
 
   const formatTime = (secs) => {
     if (isNaN(secs)) return '00:00';
@@ -399,9 +440,9 @@ const WatchMovie = () => {
               </div>
 
               <div className="movie-actions">
-                <button className="btn-action" onClick={() => setBookmarked(!bookmarked)} style={{ color: bookmarked ? 'var(--accent-color)' : 'inherit' }}>
-                  <svg width="16" height="16" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                  {bookmarked ? 'Đã lưu' : 'Lưu phim'}
+                <button className="btn-action" onClick={toggleBookmark} style={{ color: isBookmarked ? 'var(--accent-color)' : 'inherit' }}>
+                  <svg width="16" height="16" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                  {isBookmarked ? 'Đã lưu' : 'Lưu phim'}
                 </button>
                 <button className="btn-action">
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
@@ -509,7 +550,7 @@ const WatchMovie = () => {
             ) : (
               <>
                 <div className="episode-header">
-                  <span className="episode-title" style={{ fontSize: '18px', fontWeight: 'bold' }}>Top 10 phim thịnh hành</span>
+                  <span className="episode-title" style={{ fontSize: '18px', fontWeight: 'bold' }}>Phim đề xuất cho bạn</span>
                 </div>
                 <div className="episode-list" style={{ paddingRight: '5px', overflowY: 'auto', flex: 1 }}>
                   {top10Movies.map((m, index) => (

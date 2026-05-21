@@ -518,6 +518,43 @@ header {
     gap: 20px;
 }
 
+.btn-login-guest {
+    margin-left: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 20px;
+    background-color: var(--accent-color);
+    border-radius: 6px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-login-guest::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    transition: all 0.6s ease;
+}
+
+.btn-login-guest:hover {
+    color: #fff;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.5);
+    background-color: #0294e0;
+}
+
+.btn-login-guest:hover::after {
+    left: 200%;
+}
+
 /* (Comment fixed) */
 .search-wrapper {
     position: relative;

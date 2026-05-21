@@ -170,7 +170,7 @@ const Navbar = ({ onToggleFilter }) => {
 
         {/* User Menu / Login Button */}
         {!isLoggedIn ? (
-          <Link to="/login" style={{ marginLeft: '15px', color: '#fff', textDecoration: 'none', fontWeight: 'bold', padding: '8px 16px', backgroundColor: 'var(--accent-color)', borderRadius: '6px' }}>Đăng Nhập</Link>
+          <Link to="/login" className="btn-login-guest">Đăng Nhập</Link>
         ) : (
           <div className={`user-menu-wrapper ${isUserMenuActive ? 'active' : ''}`}>
             <div 
