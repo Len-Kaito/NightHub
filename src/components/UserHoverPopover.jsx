@@ -1,4 +1,4 @@
-import React from 'react';
+import ReactDOM from 'react-dom';
 import { DEMO_USERS } from '../context/ContentContext';
 
 const DEFAULT_AVATAR = 'https://static2.vieon.vn/vieplay-image/profile_avatar/2023/03/28/9rdo8k24_asset24x.webp';
@@ -11,7 +11,7 @@ const UserHoverPopover = ({ authorName, x, y, onMouseEnter, onMouseLeave }) => {
   const maxLeft = window.innerWidth - 440; // 420px width + padding
   const safeX = Math.min(x, maxLeft);
 
-  return (
+  return ReactDOM.createPortal(
     <div 
       className="user-hover-popover" 
       style={{ left: safeX, top: y }}
@@ -69,7 +69,8 @@ const UserHoverPopover = ({ authorName, x, y, onMouseEnter, onMouseLeave }) => {
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 };
 
