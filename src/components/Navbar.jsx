@@ -2,16 +2,68 @@ import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useContent } from '../context/ContentContext';
+import ConfirmModal from './ui/ConfirmModal';
 
 const Navbar = ({ onToggleFilter }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isNotiActive, setIsNotiActive] = useState(false);
   const [isUserMenuActive, setIsUserMenuActive] = useState(false);
-  const [isNotiRead, setIsNotiRead] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      img: '/DanhMuc/Trang chủ/Tiếp tục xem/One Piece _ ngang.jpg',
+      title: 'Tập mới đã có sẵn!',
+      desc: 'One Piece (Tập 1089) vừa được cập nhật. Xem ngay nào!',
+      time: '10 phút trước',
+      isRead: false
+    },
+    {
+      id: 2,
+      img: '/public/DanhMuc/Phim điện ảnh/Hot Hit/Interstellar _ ngang.jpg',
+      title: 'Gợi ý cho bạn',
+      desc: "Dựa trên sở thích của bạn, chúng tôi đề xuất phim 'Interstellar'.",
+      time: '2 giờ trước',
+      isRead: false
+    },
+    {
+      id: 3,
+      img: '/public/images/broken-shield-icon-removebg-preview (1).png',
+      title: 'Cảnh báo bảo mật',
+      desc: 'Tài khoản của bạn vừa được đăng nhập từ một thiết bị mới.',
+      time: '1 ngày trước',
+      isRead: false
+    },
+    {
+      id: 4,
+      img: '/public/images/logo_VIP.png',
+      title: 'Khuyến mãi đặc biệt',
+      desc: 'Nâng cấp tài khoản Premium để trải nghiệm không quảng cáo với giá ưu đãi.',
+      time: '3 ngày trước',
+      isRead: true
+    }
+  ]);
+  
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+  };
+
+  const markAsRead = (id) => {
+    setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+  };
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const { currentAvatar, isLoggedIn, logout } = useUser();
   const { movies } = useContent();
   const navigate = useNavigate();
+
+  const handleLogoutConfirm = () => {
+    setIsLogoutModalOpen(false);
+    logout();
+    setIsUserMenuActive(false);
+    navigate('/login');
+  };
 
   const handleSearchSubmit = (e) => {
     if (e.key === 'Enter' && searchQuery.trim()) {
@@ -21,11 +73,19 @@ const Navbar = ({ onToggleFilter }) => {
   };
 
   const searchRef = useRef(null);
+  const notiRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setIsSearchActive(false);
+      }
+      if (notiRef.current && !notiRef.current.contains(event.target)) {
+        setIsNotiActive(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuActive(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -48,8 +108,7 @@ const Navbar = ({ onToggleFilter }) => {
     : [];
 
   return (
-
-
+    <>
     <header>
       <div className="nav-left">
         <Link to="/" className="logo">
@@ -143,26 +202,32 @@ const Navbar = ({ onToggleFilter }) => {
 
         {/* Thông báo - chỉ hiện khi đã đăng nhập */}
         {isLoggedIn && (
-        <div className="notification-wrapper">
-          <div className="noti-btn-container" onClick={() => setIsNotiActive(!isNotiActive)}>
+        <div className="notification-wrapper" ref={notiRef}>
+          <div className="noti-btn-container" onClick={() => { setIsNotiActive(!isNotiActive); setIsUserMenuActive(false); }}>
             <svg className="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            {!isNotiRead && <div className="noti-badge"></div>}
+            {unreadCount > 0 && <div className="noti-badge">{unreadCount > 9 ? '9+' : unreadCount}</div>}
           </div>
 
           <div className={`notification-dropdown ${isNotiActive ? 'active' : ''}`} id="notiDropdown">
-            <div className="noti-header">Thông báo<span style={{cursor: 'pointer'}} onClick={() => setIsNotiRead(true)}>Đánh dấu đã đọc</span></div>
+            <div className="noti-header">Thông báo<span style={{cursor: 'pointer'}} onClick={markAllAsRead}>Đánh dấu đã đọc</span></div>
             <div className="noti-list">
-              <div className={`noti-item ${isNotiRead ? '' : 'unread'}`}>
-                <img src="/DanhMuc/Trang chủ/Tiếp tục xem/One Piece _ ngang.jpg" alt="Phim" className="noti-img" />
-                <div className="noti-content">
-                  <div className="noti-title">Tập mới đã có sẵn!</div>
-                  <div className="noti-desc">One Piece (Tập 1089) vừa được cập nhật. Xem ngay nào!</div>
-                  <div className="noti-time">10 phút trước</div>
+              {notifications.map(noti => (
+                <div 
+                  key={noti.id} 
+                  className={`noti-item ${noti.isRead ? '' : 'unread'}`}
+                  onClick={() => markAsRead(noti.id)}
+                >
+                  <img src={noti.img} alt="Phim" className="noti-img" />
+                  <div className="noti-content">
+                    <div className="noti-title">{noti.title}</div>
+                    <div className="noti-desc">{noti.desc}</div>
+                    <div className="noti-time">{noti.time}</div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -172,11 +237,11 @@ const Navbar = ({ onToggleFilter }) => {
         {!isLoggedIn ? (
           <Link to="/login" className="btn-login-guest">Đăng Nhập</Link>
         ) : (
-          <div className={`user-menu-wrapper ${isUserMenuActive ? 'active' : ''}`}>
+          <div className={`user-menu-wrapper ${isUserMenuActive ? 'active' : ''}`} ref={userMenuRef}>
             <div 
               className="avatar" 
               title="Tài khoản" 
-              onClick={() => setIsUserMenuActive(!isUserMenuActive)}
+              onClick={() => { setIsUserMenuActive(!isUserMenuActive); setIsNotiActive(false); }}
               style={{ backgroundImage: `url('${currentAvatar}')` }}
             ></div>
             <div className={`user-dropdown ${isUserMenuActive ? 'active' : ''}`} id="userDropdown">
@@ -204,19 +269,30 @@ const Navbar = ({ onToggleFilter }) => {
                 <span>Cài Đặt</span>
               </Link>
               <div className="user-menu-divider"></div>
-              <Link to="/login" className="user-menu-item logout-btn" onClick={() => logout()}>
+              <a href="#" className="user-menu-item logout-btn" onClick={(e) => { e.preventDefault(); setIsUserMenuActive(false); setIsLogoutModalOpen(true); }}>
                 <svg viewBox="0 0 24 24" stroke="currentColor">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                   <polyline points="16 17 21 12 16 7"></polyline>
                   <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
                 <span>Đăng Xuất</span>
-              </Link>
+              </a>
             </div>
           </div>
         )}
       </div>
     </header>
+      <ConfirmModal
+        isOpen={isLogoutModalOpen}
+        title="Đăng xuất"
+        description="Bạn có chắc chắn muốn đăng xuất khỏi Nighthub không?"
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setIsLogoutModalOpen(false)}
+        confirmText="Đăng xuất"
+        cancelText="Quay lại"
+        isDanger={true}
+      />
+    </>
   );
 };
 

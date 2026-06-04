@@ -28,7 +28,7 @@ const Login = () => {
       <div className="logo-section">
         <div className="logo-wrapper">
           <Link to="/" className="logo">
-            <img src="/images/only_logo.png" alt="Nighthub Logo" />
+            <img src="/images/logo.png" alt="Nighthub Logo" />
           </Link>
         </div>
       </div>

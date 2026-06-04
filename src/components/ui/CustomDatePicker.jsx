@@ -150,8 +150,14 @@ const CustomDatePicker = ({ value, onChange, placeholder }) => {
         );
     };
 
-    const monthOptions = MONTHS.map((m, i) => ({ label: m, value: i }));
-    const yearOptions = Array.from({ length: 11 }, (_, i) => ({ label: String(2020 + i), value: 2020 + i }));
+    const realToday = new Date();
+    const currentYear = realToday.getFullYear();
+    const currentMonthNum = realToday.getMonth();
+    const isMaxMonth = currentMonth.getFullYear() === currentYear && currentMonth.getMonth() === currentMonthNum;
+
+    const monthOptions = MONTHS.map((m, i) => ({ label: m, value: i }))
+        .filter(opt => currentMonth.getFullYear() < currentYear || opt.value <= currentMonthNum);
+    const yearOptions = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => ({ label: String(2020 + i), value: 2020 + i }));
 
     const portalContent = isOpen ? ReactDOM.createPortal(
         <div ref={popupRef} style={{
@@ -191,10 +197,10 @@ const CustomDatePicker = ({ value, onChange, placeholder }) => {
                 </div>
 
                 <button
-                    style={navBtnStyle}
-                    onClick={nextMonth}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-color)'; e.currentTarget.style.color = 'var(--always-white)'; e.currentTarget.style.transform = 'scale(1.15)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-main)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                    style={{ ...navBtnStyle, opacity: isMaxMonth ? 0.3 : 1, cursor: isMaxMonth ? 'not-allowed' : 'pointer' }}
+                    onClick={() => { if (!isMaxMonth) nextMonth(); }}
+                    onMouseEnter={(e) => { if (!isMaxMonth) { e.currentTarget.style.background = 'var(--accent-color)'; e.currentTarget.style.color = 'var(--always-white)'; e.currentTarget.style.transform = 'scale(1.15)'; } }}
+                    onMouseLeave={(e) => { if (!isMaxMonth) { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.color = 'var(--text-main)'; e.currentTarget.style.transform = 'scale(1)'; } }}
                 >&gt;</button>
             </div>
 
@@ -205,38 +211,46 @@ const CustomDatePicker = ({ value, onChange, placeholder }) => {
 
             {/* Date cells */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
-                {matrix.map((row, r) => row.map((cell, c) => {
-                    const isSelected = value && value === `${String(cell.date.getDate()).padStart(2,'0')}/${String(cell.date.getMonth()+1).padStart(2,'0')}/${cell.date.getFullYear()}`;
-                    return (
-                        <div key={`${r}-${c}`}
-                             onClick={() => handleDateClick(cell.date)}
-                             style={{
-                                padding: '7px 0', fontSize: '13px', borderRadius: '6px', cursor: 'pointer',
-                                color: cell.isCurrentMonth ? (isSelected ? 'var(--always-white)' : 'var(--text-main)') : 'var(--text-muted)',
-                                background: isSelected ? 'var(--accent-red)' : 'transparent',
-                                opacity: cell.isCurrentMonth ? 1 : 0.4,
-                                transition: 'all 0.15s ease',
-                                border: '1px solid transparent',
-                             }}
-                             onMouseEnter={(e) => {
-                                if (!isSelected) {
-                                    e.currentTarget.style.background = 'var(--bg-hover, rgba(0,0,0,0.06))';
-                                    e.currentTarget.style.borderColor = 'var(--border-color)';
-                                    e.currentTarget.style.transform = 'scale(1.12)';
-                                }
-                             }}
-                             onMouseLeave={(e) => {
-                                if (!isSelected) {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.borderColor = 'transparent';
-                                    e.currentTarget.style.transform = 'scale(1)';
-                                }
-                             }}
-                        >
-                            {cell.day}
-                        </div>
-                    );
-                }))}
+                {(() => {
+                    const today = new Date();
+                    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+                    return matrix.map((row, r) => row.map((cell, c) => {
+                        const isSelected = value && value === `${String(cell.date.getDate()).padStart(2,'0')}/${String(cell.date.getMonth()+1).padStart(2,'0')}/${cell.date.getFullYear()}`;
+                        const isToday = cell.date.getDate() === today.getDate() && cell.date.getMonth() === today.getMonth() && cell.date.getFullYear() === today.getFullYear();
+                        const cellStart = new Date(cell.date.getFullYear(), cell.date.getMonth(), cell.date.getDate()).getTime();
+                        const isFuture = cellStart > todayStart;
+                        return (
+                            <div key={`${r}-${c}`}
+                                 onClick={() => { if (!isFuture) handleDateClick(cell.date); }}
+                                 style={{
+                                    padding: '7px 0', fontSize: '13px', borderRadius: '6px', cursor: isFuture ? 'not-allowed' : 'pointer',
+                                    color: isFuture ? 'var(--text-muted)' : (cell.isCurrentMonth ? (isSelected ? 'var(--always-white)' : (isToday ? 'var(--accent-red)' : 'var(--text-main)')) : 'var(--text-muted)'),
+                                    background: isSelected ? 'var(--accent-red)' : 'transparent',
+                                    opacity: isFuture ? 0.3 : (cell.isCurrentMonth ? 1 : 0.4),
+                                    transition: 'all 0.15s ease',
+                                    border: isToday && !isSelected ? '1px solid var(--accent-red)' : '1px solid transparent',
+                                    fontWeight: isToday ? 'bold' : 'normal',
+                                 }}
+                                 onMouseEnter={(e) => {
+                                    if (!isSelected && !isFuture) {
+                                        e.currentTarget.style.background = 'var(--bg-hover, rgba(0,0,0,0.06))';
+                                        e.currentTarget.style.borderColor = isToday ? 'var(--accent-red)' : 'var(--border-color)';
+                                        e.currentTarget.style.transform = 'scale(1.12)';
+                                    }
+                                 }}
+                                 onMouseLeave={(e) => {
+                                    if (!isSelected && !isFuture) {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.borderColor = isToday ? 'var(--accent-red)' : 'transparent';
+                                        e.currentTarget.style.transform = 'scale(1)';
+                                    }
+                                 }}
+                            >
+                                {cell.day}
+                            </div>
+                        );
+                    }));
+                })()}
             </div>
             <style>{`@keyframes dpFadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         </div>,
