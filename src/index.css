@@ -4226,15 +4226,25 @@ header {
 }
 
 .stars-container.locked {
-    pointer-events: none;
+    pointer-events: auto;
 }
 
 .stars-container.locked span.active {
     color: var(--star-color);
 }
 
+.stars-container.locked span.active:hover {
+    opacity: 0.7;
+    transform: scale(0.9);
+}
+
 .stars-container.locked span:not(.active) {
     color: rgba(0, 0, 0, 0.15);
+}
+
+.stars-container span.hover {
+    color: var(--star-color) !important;
+    opacity: 0.75;
 }
 
 .rating-text {
@@ -4333,8 +4343,18 @@ header {
     color: var(--star-color);
 }
 
+[data-theme='dark'] .stars-container.locked span.active:hover {
+    opacity: 0.7;
+    transform: scale(0.9);
+}
+
 [data-theme='dark'] .stars-container.locked span:not(.active) {
     color: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme='dark'] .stars-container span.hover {
+    color: var(--star-color) !important;
+    opacity: 0.75;
 }
 
 [data-theme='dark'] .card-action-btn {

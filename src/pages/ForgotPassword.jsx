@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import './Auth.css';
@@ -13,11 +13,35 @@ const ForgotPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [otpExpired, setOtpExpired] = useState(false);
+  const countdownRef = useRef(null);
+
+  const startCountdown = () => {
+    clearInterval(countdownRef.current);
+    setOtpExpired(false);
+    setCountdown(60);
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current);
+          setOtpExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  useEffect(() => {
+    return () => clearInterval(countdownRef.current);
+  }, []);
 
   const handleNextStep1 = (e) => {
     e.preventDefault();
     if (emailOrPhone.trim()) {
       setStep(2);
+      startCountdown();
     }
   };
 
@@ -137,8 +161,61 @@ const ForgotPassword = () => {
               
               <button type="submit" className="auth-btn-submit" style={{ marginTop: '10px' }}>Xác Thực</button>
               
-              <div className="auth-nav-text" style={{ marginTop: '15px' }}>
-                Chưa nhận được mã? <a href="#" onClick={(e) => { e.preventDefault(); showToast('Đã gửi lại mã!'); }}>Gửi lại</a>
+              {/* COUNTDOWN TIMER */}
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                {countdown > 0 && !otpExpired && (
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    background: countdown <= 30 ? 'rgba(220,53,69,0.15)' : 'rgba(255,255,255,0.06)',
+                    border: `1px solid ${countdown <= 30 ? 'rgba(220,53,69,0.4)' : 'rgba(255,255,255,0.12)'}`,
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={countdown <= 30 ? '#dc3545' : 'var(--text-muted)'} strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span style={{ fontSize: '13px', color: countdown <= 30 ? '#dc3545' : 'var(--text-muted)' }}>
+                      Mã hết hạn sau <b>{Math.floor(countdown / 60).toString().padStart(2,'0')}:{(countdown % 60).toString().padStart(2,'0')}</b>
+                    </span>
+                  </div>
+                )}
+                {otpExpired && (
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    background: 'rgba(220,53,69,0.15)',
+                    border: '1px solid rgba(220,53,69,0.4)'
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc3545" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span style={{ fontSize: '13px', color: '#dc3545' }}>Mã OTP đã hết hạn!</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="auth-nav-text" style={{ marginTop: '12px' }}>
+                Chưa nhận được mã?{' '}
+                {countdown > 0 && !otpExpired ? (
+                  <span style={{ color: 'var(--text-muted)', cursor: 'not-allowed', opacity: 0.5 }}>Gửi lại ({Math.floor(countdown / 60).toString().padStart(2,'0')}:{(countdown % 60).toString().padStart(2,'0')})</span>
+                ) : (
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    setOtp(Array(6).fill(''));
+                    setOtpExpired(false);
+                    startCountdown();
+                    showToast('Đã gửi lại mã xác thực!');
+                  }}>Gửi lại</a>
+                )}
               </div>
             </form>
           </>

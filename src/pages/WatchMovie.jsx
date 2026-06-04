@@ -50,6 +50,7 @@ const WatchMovie = () => {
   const [ccEnabled, setCcEnabled] = useState(false);
   const [rating, setRating] = useState(0);
   const [ratedLocked, setRatedLocked] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
   const [commentText, setCommentText] = useState('');
   const [currentTimeNum, setCurrentTimeNum] = useState(0);
   const [durationNum, setDurationNum] = useState(0);
@@ -276,9 +277,20 @@ const WatchMovie = () => {
   };
 
   const handleStarClick = (val) => {
-    if (ratedLocked) return;
-    setRating(val);
-    setRatedLocked(true);
+    if (ratedLocked && val === rating) {
+      // Thu hồi đánh giá nếu click vào cùng số sao
+      setRating(0);
+      setRatedLocked(false);
+    } else {
+      setRating(val);
+      setRatedLocked(true);
+    }
+  };
+
+  const handleRemoveRating = () => {
+    setRating(0);
+    setRatedLocked(false);
+    setHoverRating(0);
   };
 
 
@@ -577,16 +589,49 @@ const WatchMovie = () => {
                       <span
                         key={val}
                         data-val={val}
-                        className={ratedLocked && val <= rating ? 'active' : ''}
+                        className={(
+                          ratedLocked
+                            ? val <= rating ? 'active' : ''
+                            : val <= hoverRating ? 'hover' : ''
+                        )}
                         onClick={() => handleStarClick(val)}
+                        onMouseEnter={() => !ratedLocked && setHoverRating(val)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        title={ratedLocked && val === rating ? 'Click để thu hồi đánh giá' : `Đánh giá ${val} sao`}
+                        style={{ cursor: 'pointer' }}
                       >★</span>
                     ))}
                   </div>
                   <div className="rating-text" style={ratedLocked ? { color: 'var(--star-color)', fontWeight: 'bold' } : {}}>
                     {ratedLocked ? (
-                      <>Bạn đã đánh giá <b>{rating} sao</b></>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <span>Bạn đã đánh giá <b>{rating} sao</b></span>
+                        <button
+                          onClick={handleRemoveRating}
+                          style={{
+                            background: 'rgba(255,255,255,0.08)',
+                            border: '1px solid rgba(255,255,255,0.15)',
+                            color: 'var(--text-muted)',
+                            borderRadius: '20px',
+                            padding: '4px 14px',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,53,69,0.2)'; e.currentTarget.style.borderColor = 'rgba(220,53,69,0.4)'; e.currentTarget.style.color = '#dc3545'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                          Thu hồi đánh giá
+                        </button>
+                      </div>
                     ) : (
-                      'Click vào sao để đánh giá'
+                      hoverRating > 0 ? `${['','Tệ','Tạm được','Bình thường','Hay','Tuyệt vời'][hoverRating]} (${hoverRating} sao)` : 'Click vào sao để đánh giá'
                     )}
                   </div>
                 </div>
