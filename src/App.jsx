@@ -23,6 +23,7 @@ import ChooseGenre from './pages/ChooseGenre';
 import SearchResults from './pages/SearchResults';
 import ChatBubble from './components/ui/ChatBubble';
 import ScrollToTop from './components/ScrollToTop';
+import BackToTopButton from './components/BackToTopButton';
 import './index.css';
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
                   <Route path="*" element={<Home />} />
                 </Routes>
                 <ChatBubble />
+                <BackToTopButton />
               </Router>
             </ChatProvider>
           </ToastProvider>
