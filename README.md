@@ -1,17 +1,4 @@
 # Nighthub - Hệ thống xem phim trực tuyến
-
-Nighthub là một nền tảng website xem phim trực tuyến hiện đại với giao diện mượt mà.
-
-Dự án được xây dựng dựa trên **React.js** và **Vite**.
-
-## 📌 Yêu Cầu Hệ Thống (Prerequisites)
-
-Trước khi cài đặt, hãy đảm bảo máy tính của bạn đã cài đặt các phần mềm sau:
-1. **Node.js**: (Phiên bản v16.0.0 trở lên). Tải tại: [https://nodejs.org/](https://nodejs.org/)
-2. **Git**: Dùng để tải mã nguồn. Tải tại: [https://git-scm.com/](https://git-scm.com/)
-
----
-
 ## 🚀 Hướng Dẫn Cài Đặt & Chạy Dự Án (Local Development)
 
 Để chạy dự án này trên máy cá nhân của bạn, vui lòng làm theo các bước dưới đây:
